@@ -1,0 +1,257 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .project-no-cell {
+            white-space: nowrap;
+        }
+        .project-no-value {
+            margin-left: 6px;
+        }
+        /* Global reset */
+        * {
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 1.5cm;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            color: #000;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Logo table */
+        .logo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            border: none;
+        }
+        .logo-table td {
+            border: none;
+            padding: 5px;
+            vertical-align: middle;
+        }
+
+        /* Title table */
+        .title-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            border: 1px solid #000;
+        }
+        .title-table td {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            background-color: #f2f2f2;
+        }
+
+        /* Details table */
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12pt;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #000;
+        }
+        .details-table td {
+            border: 1px solid #000;
+            padding: 8px 6px;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+        .details-table td:first-child {
+            width: 25%;
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        /* Device table */
+        .device-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 12pt;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #000;
+        }
+        .device-table th,
+        .device-table td {
+            border: 1px solid #000;
+            padding: 8px 6px;
+            vertical-align: top;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+        .device-table th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        /* Column widths (same as form) */
+        .col-item-no { width: 8%; }
+        .col-device-name { width: 20%; }
+        .col-serial { width: 32%; }
+        .col-qty { width: 8%; }
+        .col-location { width: 32%; }
+
+        /* Signature table */
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #000;
+        }
+        .signature-table th,
+        .signature-table td {
+            border: 1px solid #000;
+            padding: 8px 6px;
+            vertical-align: top;
+            box-sizing: border-box;
+        }
+        .signature-table th {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: center;
+        }
+        .signature-table td:first-child {
+            width: 40%;
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        /* Ensure no extra margins */
+        h2, h3 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo row (matching form structure) -->
+        <!-- Logo row with borders -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
+        <tr>
+            <td rowspan="2" style="width: 6%; border: 1px solid #000; text-align: left; vertical-align: middle; padding: 5px;">
+                <img src="data:image/png;base64,{{ logo_left }}" alt="Logo Left" style="height: 70px;">
+            </td>
+            <td style="width: 50%; border: 1px solid #000; padding: 8px; font-weight: bold; font-size: 12pt; text-align: left; vertical-align: middle;">
+                PROJECT NAME: {{ institution.dcc.project_name }}
+            </td>
+            <td rowspan="2" style="width: 5%; border: 1px solid #000; text-align: right; vertical-align: middle; padding: 5px;">
+                <img src="data:image/png;base64,{{ logo_right }}" alt="Logo Right" style="height: 70px;">
+            </td>
+        </tr>
+        <tr>
+            <td class="project-no-cell" style="border: 1px solid #000; padding: 8px; font-weight: bold; font-size: 12pt; text-align: left; vertical-align: middle;">
+                PROJECT NO.: <span class="project-no-value">{{ institution.project_no|default:"" }}</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Form Title -->
+    <table class="title-table">
+        <tr>
+            <td>DEVICE INSTALLATION FORM FOR ACTIVE DEVICES INSTALLATION</td>
+        </tr>
+    </table>
+
+    <!-- Details Table (2 columns, as in form) -->
+    <table class="details-table">
+        <tr>
+            <td>DCC name:</td>
+            <td>{{ institution.dcc.name }}</td>
+        </tr>
+        <tr>
+            <td>Institution name:</td>
+            <td>{{ institution.name }}</td>
+        </tr>
+        <tr>
+            <td>Date of Installation:</td>
+            <td>{{ institution.date_of_installation|date:"d/m/Y" }}</td>
+        </tr>
+        <tr>
+            <td>Contractor company name:</td>
+            <td>{{ institution.contractor_company }}</td>
+        </tr>
+        <tr>
+            <td>Contractors' representative:</td>
+            <td>{{ institution.contractor_rep }}</td>
+        </tr>
+        <tr>
+            <td>ICTA representative:</td>
+            <td>{{ institution.icta_rep|default_if_none:"" }}</td>
+        </tr>
+    </table>
+
+    <!-- Device Table -->
+    <table class="device-table">
+        <thead>
+            <tr>
+                <th class="col-item-no">No.</th>
+                <th class="col-device-name">Device Name</th>
+                <th class="col-serial">Serial Number</th>
+                <th class="col-qty">QTY</th>
+                <th class="col-location">Location Installed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr>
+                <td>{{ device.item_no }}</td>
+                <td>{{ device.name }}</td>
+                <td>{{ device.serial }}</td>
+                <td>{{ device.quantity }}</td>
+                <td>{{ device.location }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Signature Table -->
+    <table class="signature-table">
+        <tr>
+            <th colspan="2">Contractor Confirmation:</th>
+        </tr>
+        <tr>
+            <td colspan="2">
+                I confirm that the installation has been completed as per the required specifications.
+            </td>
+        </tr>
+        <tr>
+            <td>Contractor company name:</td>
+            <td>{{ institution.contractor_company }}</td>
+        </tr>
+        <tr>
+            <td>Contractor representative name:</td>
+            <td>{{ institution.contractor_rep }}</td>
+        </tr>
+        <tr>
+            <td>Signature:</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Date:</td>
+            <td>{{ institution.date_of_installation|date:"d/m/Y" }}</td>
+        </tr>
+    </table>
+</body>
+</html>

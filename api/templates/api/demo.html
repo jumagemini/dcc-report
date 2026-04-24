@@ -1,0 +1,219 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Demo – Field Report Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        h2 { margin-top: 0; }
+        label { display: inline-block; width: 150px; }
+        input, select { margin-bottom: 8px; padding: 5px; width: 250px; }
+        button { padding: 8px 16px; background: #0078d7; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a9e; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .result { margin-top: 10px; }
+        #auth-token { width: 300px; }
+    </style>
+</head>
+<body>
+    <h1>📡 Field Report Generator API Demo</h1>
+    <p>This page demonstrates how to interact with the API endpoints. All requests are made using <code>fetch</code> from JavaScript.</p>
+
+    <!-- Authentication Setup (optional) -->
+    <section>
+        <h2>🔐 Authentication (Token)</h2>
+        <p>If you enabled token authentication, enter your token here to include in requests.</p>
+        <label>Auth Token:</label>
+        <input type="text" id="auth-token" placeholder="e.g., 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b">
+        <button onclick="setAuthToken()">Set Token</button>
+    </section>
+
+    <!-- List DCCs -->
+    <section>
+        <h2>📋 List DCCs</h2>
+        <button onclick="listDCCs()">GET /api/dccs/</button>
+        <pre id="dcc-list-result" class="result">Click button to fetch DCCs...</pre>
+    </section>
+
+    <!-- Create Institution -->
+    <section>
+        <h2>🏫 Create Institution</h2>
+        <form id="create-institution-form">
+            <label>DCC ID:</label>
+            <input type="number" id="inst-dcc" required><br>
+            <label>Name:</label>
+            <input type="text" id="inst-name" required><br>
+            <label>Date of Installation:</label>
+            <input type="date" id="inst-date" required><br>
+            <label>Contractor Company:</label>
+            <input type="text" id="inst-company" required><br>
+            <label>Contractor Rep:</label>
+            <input type="text" id="inst-rep" required><br>
+            <label>ICTA Rep:</label>
+            <input type="text" id="inst-icta"><br>
+            <label>ONU Serial:</label>
+            <input type="text" id="inst-onu-serial" required><br>
+            <label>ONU Location:</label>
+            <input type="text" id="inst-onu-loc" required><br>
+            <label>Indoor AP1 Serial:</label>
+            <input type="text" id="inst-ap1-serial" required><br>
+            <label>AP1 Location:</label>
+            <input type="text" id="inst-ap1-loc" required><br>
+            <label>Outdoor AP Serial:</label>
+            <input type="text" id="inst-out-serial" required><br>
+            <label>Outdoor Location:</label>
+            <input type="text" id="inst-out-loc" required><br>
+            <button type="submit">POST /api/institutions/</button>
+        </form>
+        <pre id="create-inst-result" class="result"></pre>
+    </section>
+
+    <!-- Upload Photo -->
+    <section>
+        <h2>📸 Upload Photo for Institution</h2>
+        <form id="upload-photo-form">
+            <label>Institution ID:</label>
+            <input type="number" id="photo-inst-id" required><br>
+            <label>Photo Type:</label>
+            <select id="photo-type">
+                <option value="before">Before Installation</option>
+                <option value="after">After Installation</option>
+            </select><br>
+            <label>Device Type:</label>
+            <select id="photo-device">
+                <option value="ONU">ONU</option>
+                <option value="AP1">Indoor AP1</option>
+                <option value="AP2">Indoor AP2</option>
+                <option value="AP3">Indoor AP3</option>
+                <option value="OUT">Outdoor AP1</option>
+            </select><br>
+            <label>Image File:</label>
+            <input type="file" id="photo-file" accept="image/*" required><br>
+            <button type="submit">POST /api/institutions/{id}/upload_photos/</button>
+        </form>
+        <pre id="upload-result" class="result"></pre>
+    </section>
+
+    <!-- Generate PDF -->
+    <section>
+        <h2>📄 Generate Institution PDF</h2>
+        <label>Institution ID:</label>
+        <input type="number" id="pdf-inst-id" required>
+        <button onclick="getPDF()">GET /api/institutions/{id}/pdf/</button>
+        <pre id="pdf-result" class="result">Opens PDF in new tab...</pre>
+    </section>
+
+    <!-- Download Excel for DCC -->
+    <section>
+        <h2>📊 Download DCC Excel Report</h2>
+        <label>DCC ID:</label>
+        <input type="number" id="excel-dcc-id" required>
+        <button onclick="getExcel()">GET /api/dccs/{id}/excel_report/</button>
+        <pre id="excel-result" class="result">Downloads Excel file...</pre>
+    </section>
+
+    <script>
+        let authToken = '';
+
+        function setAuthToken() {
+            authToken = document.getElementById('auth-token').value;
+            alert('Token set for requests.');
+        }
+
+        function getHeaders() {
+            const headers = {};
+            if (authToken) {
+                headers['Authorization'] = 'Token ' + authToken;
+            }
+            return headers;
+        }
+
+        async function listDCCs() {
+            const resultEl = document.getElementById('dcc-list-result');
+            try {
+                const response = await fetch('/api/dccs/', { headers: getHeaders() });
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        document.getElementById('create-institution-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultEl = document.getElementById('create-inst-result');
+            const payload = {
+                dcc: document.getElementById('inst-dcc').value,
+                name: document.getElementById('inst-name').value,
+                date_of_installation: document.getElementById('inst-date').value,
+                contractor_company: document.getElementById('inst-company').value,
+                contractor_rep: document.getElementById('inst-rep').value,
+                icta_rep: document.getElementById('inst-icta').value,
+                onu_serial: document.getElementById('inst-onu-serial').value,
+                onu_location: document.getElementById('inst-onu-loc').value,
+                indoor_ap1_serial: document.getElementById('inst-ap1-serial').value,
+                indoor_ap1_location: document.getElementById('inst-ap1-loc').value,
+                outdoor_ap_serial: document.getElementById('inst-out-serial').value,
+                outdoor_ap_location: document.getElementById('inst-out-loc').value,
+                // optional fields
+                indoor_ap2_serial: '',
+                indoor_ap2_location: '',
+                indoor_ap3_serial: '',
+                indoor_ap3_location: '',
+                project_no: ''
+            };
+            try {
+                const response = await fetch('/api/institutions/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getHeaders()
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        document.getElementById('upload-photo-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const instId = document.getElementById('photo-inst-id').value;
+            const resultEl = document.getElementById('upload-result');
+            const formData = new FormData();
+            formData.append('photo_type', document.getElementById('photo-type').value);
+            formData.append('device_type', document.getElementById('photo-device').value);
+            formData.append('image', document.getElementById('photo-file').files[0]);
+
+            try {
+                const response = await fetch(`/api/institutions/${instId}/upload_photos/`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                });
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        function getPDF() {
+            const instId = document.getElementById('pdf-inst-id').value;
+            if (!instId) return alert('Enter Institution ID');
+            window.open(`/api/institutions/${instId}/pdf/`, '_blank');
+            document.getElementById('pdf-result').textContent = 'PDF opened in new tab.';
+        }
+
+        function getExcel() {
+            const dccId = document.getElementById('excel-dcc-id').value;
+            if (!dccId) return alert('Enter DCC ID');
+            window.open(`/api/dccs/${dccId}/excel_report/`, '_blank');
+            document.getElementById('excel-result').textContent = 'Excel download started.';
+        }
+    </script>
+</body>
+</html>

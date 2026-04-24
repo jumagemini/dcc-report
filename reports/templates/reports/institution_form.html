@@ -1,0 +1,610 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Device Installation Form</title>
+    <style>
+        .project-no-cell {
+            white-space: nowrap;
+        }
+        .project-no-cell input {
+            display: inline-block;
+            width: auto;
+            min-width: 80px;
+            border: 1px solid #aaa;
+            padding: 2px 4px;
+            margin-left: 6px;
+            font-size: inherit;
+        }
+        /* Center QTY column */
+        #device-table td:nth-child(4) {
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* Center placeholder text for N/A */
+        #device-table td:nth-child(3) input::placeholder,
+        #device-table td:nth-child(5) input::placeholder {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+        /* Center text in QTY column */
+        .col-qty, .qty-display {
+            text-align: center;
+        }
+
+        /* Center placeholder text inside Serial Number inputs */
+        input[type="text"].placeholder-center::placeholder {
+            text-align: center;
+        }
+
+        /* Alternative: apply directly to all inputs in device table */
+        #device-table td:nth-child(3) input,
+        #device-table td:nth-child(5) input {
+            text-align: left;   /* keep normal text left-aligned */
+        }
+
+        /* Center placeholder only */
+        #device-table td:nth-child(3) input::placeholder {
+            text-align: center;
+        }
+        input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+        .qty-display {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+        }
+        .photo-table td {
+            padding: 5px;
+            border: none;
+            vertical-align: middle;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #222;
+        }
+        .details-table td {
+            border: 1px solid #222;
+            padding: 8px 6px;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+        .details-table td:first-child,
+        .details-table td:nth-child(3) {
+            width: 20%;
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        .details-table td:nth-child(2),
+        .details-table td:nth-child(4) {
+            width: 30%;
+        }
+        .details-table input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .details-table input:focus {
+            border-bottom: 1px solid #0078d7;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #e6e6e6;
+            display: flex;
+            justify-content: center;
+        }
+        .form-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: white;
+            padding: 15mm 15mm;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 2px;
+            overflow-x: hidden;          /* ensure scroll if content overflows */
+            box-sizing: border-box;
+        }
+        h2, h3 {
+            margin: 5px 0;
+            font-weight: 600;
+        }
+        h2 {
+            font-size: 20px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        h3 {
+            font-size: 16px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #222;  /* ensure outer border is visible */
+        }
+        th, td {
+            border: 1px solid #222;
+            padding: 10px 6px;
+            vertical-align: top;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+        th {
+            background-color: #e0e0e0;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;       /* prevent header text wrapping */
+        }
+        /* Column widths */
+        .col-item-no { width: 8%; }
+        .col-device-name { width: 20%; }
+        .col-serial { width: 32%; }
+        .col-qty { width: 8%; }
+        .col-location { width: 32%; }
+
+        /* If you want Quantity to be the only no-wrap, use class instead of th rule */
+        /* .no-wrap { white-space: nowrap; } */
+
+        td input, td select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        td input:focus {
+            border-bottom: 1px solid #0078d7;
+        }
+        .info-line {
+            margin: 12px 0;
+            font-size: 15px;
+        }
+        .info-line strong {
+            display: inline-block;
+            min-width: 220px;
+        }
+        .photo-upload {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .photo-upload label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        .errorlist {
+            color: #d32f2f;
+            font-size: 13px;
+            list-style: none;
+            padding: 0;
+            margin: 2px 0 0;
+        }
+        .field-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .optional-badge {
+            color: #666;
+            font-weight: normal;
+            font-style: italic;
+            font-size: 12px;
+        }
+        /* Signature table inherits same column styles */
+        .signature-table {
+            margin-top: 30px;
+            table-layout: fixed;
+        }
+        .signature-table td:first-child {
+            width: 40%;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
+        <tr>
+            <td rowspan="2" style="width: 15%; border: 1px solid #000; text-align: left; vertical-align: middle; padding: 5px;">
+                <img src="{% static 'images/kplc.png' %}" alt="Logo Left" style="height: 70px;">
+            </td>
+            <td style="width: 50%; border: 1px solid #000; padding: 8px; font-weight: bold; font-size: 12pt; text-align: left; vertical-align: middle;">
+                PROJECT NAME: 
+            </td>
+            <td rowspan="2" style="width: 15%; border: 1px solid #000; text-align: right; vertical-align: middle; padding: 5px;">
+                <img src="{% static 'images/ict.png' %}" alt="Logo Right" style="height: 70px;">
+            </td>
+        </tr>
+        <tr>
+            <td class="project-no-cell" style="border: 1px solid #000; padding: 8px; font-weight: bold; font-size: 12pt; text-align: left; vertical-align: middle;">
+                PROJECT NO.: {{ form.project_no }}
+            </td>
+        </tr>
+    </table>
+
+
+    <table><tr><td><h3><center>DEVICE INSTALLATION FORM FOR ACTIVE DEVICES INSTALLATION</center></h3></td></tr></table>
+    
+
+        <!-- Details Table -->
+        <table class="details-table">
+            <tr>
+                <td><strong>DCC name:</strong></td>
+                <td>{{ dcc.name }}</td>
+            </tr>
+            <tr>    
+                <td><strong>Institution name:</strong></td>
+                <td>{{ form.name }}
+                    {{ form.name.errors }}
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Date of Installation:</strong></td>
+                <td>{{ form.date_of_installation }}</td>
+            </tr>
+            <tr>        
+                <td><strong>Contractor company name:</strong></td>
+                <td>{{ form.contractor_company }}</td>
+            </tr>
+            <tr>
+                <td><strong>Contractors' representative:</strong></td>
+                <td>{{ form.contractor_rep }}</td>
+            </tr>
+            <tr>        
+                <td><strong>ICTA representative:</strong></td>
+                <td>{{ form.icta_rep }}</td>
+            </tr>
+        </table>
+
+        <!-- Device Table with fixed column widths -->
+        <!-- Device Table with dynamic QTY and N/A placeholders -->
+        <table id="device-table">
+            <thead>
+                <tr>
+                    <th class="col-item-no">No.</th>
+                    <th class="col-device-name">Device Name</th>
+                    <th class="col-serial">Serial Number</th>
+                    <th class="col-qty no-wrap">QTY</th>
+                    <th class="col-location">Location Installed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ONU (mandatory) -->
+                <tr data-device="ONU" data-required="true">
+                    <td class="col-item-no">1</td>
+                    <td class="col-device-name">ONU</td>
+                    <td class="col-serial">{{ form.onu_serial }}</td>
+                    <td class="col-qty"><span class="qty-display">1</span></td>
+                    <td class="col-location">{{ form.onu_location }}</td>
+                </tr>
+                <!-- Indoor AP1 (mandatory) -->
+                <tr data-device="AP1" data-required="true">
+                    <td>2</td>
+                    <td>INDOOR AP1</td>
+                    <td>{{ form.indoor_ap1_serial }}</td>
+                    <td><span class="qty-display">1</span></td>
+                    <td>{{ form.indoor_ap1_location }}</td>
+                </tr>
+                <!-- Indoor AP2 (optional) -->
+                <tr data-device="AP2" data-required="false">
+                    <td>3</td>
+                    <td>INDOOR AP2 <span class="optional-badge"></span></td>
+                    <td>{{ form.indoor_ap2_serial }}</td>
+                    <td><span class="qty-display">N/A</span></td>
+                    <td>{{ form.indoor_ap2_location }}</td>
+                </tr>
+                <!-- Indoor AP3 (optional) -->
+                <tr data-device="AP3" data-required="false">
+                    <td>4</td>
+                    <td>INDOOR AP3 <span class="optional-badge"></span></td>
+                    <td>{{ form.indoor_ap3_serial }}</td>
+                    <td><span class="qty-display">N/A</span></td>
+                    <td>{{ form.indoor_ap3_location }}</td>
+                </tr>
+                <!-- Outdoor AP1 (mandatory) -->
+                <tr data-device="OUT" data-required="true">
+                    <td>5</td>
+                    <td>OUTDOOR AP1</td>
+                    <td>{{ form.outdoor_ap_serial }}</td>
+                    <td><span class="qty-display">1</span></td>
+                    <td>{{ form.outdoor_ap_location }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Additional Details -->
+       
+
+        <!-- Photo Upload Section -->
+       <h4>Before Installation Photos</h4>
+            <table class="photo-table">
+                <tr>
+                    <td>{{ photo_form.before_onu.label_tag }}</td>
+                    <td>{{ photo_form.before_onu }}</td>
+                    <td>{{ photo_form.before_ap1.label_tag }}</td>
+                    <td>{{ photo_form.before_ap1 }}</td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.before_ap2.label_tag }}</td>
+                    <td>{{ photo_form.before_ap2 }}</td>
+                    <td>{{ photo_form.before_ap3.label_tag }}</td>
+                    <td>{{ photo_form.before_ap3 }}</td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.before_out.label_tag }}</td>
+                    <td>{{ photo_form.before_out }}</td>
+                    <td></td><td></td>
+                </tr>
+            </table>
+
+            <h4>After Installation Photos</h4>
+            <table class="photo-table">
+                <tr>
+                    <td>{{ photo_form.after_onu.label_tag }}</td>
+                    <td>{{ photo_form.after_onu }}</td>
+                    <td>{{ photo_form.after_ap1.label_tag }}</td>
+                    <td>{{ photo_form.after_ap1 }}</td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.after_ap2.label_tag }}</td>
+                    <td>{{ photo_form.after_ap2 }}</td>
+                    <td>{{ photo_form.after_ap3.label_tag }}</td>
+                    <td>{{ photo_form.after_ap3 }}</td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.after_out.label_tag }}</td>
+                    <td>{{ photo_form.after_out }}</td>
+                    <td></td><td></td>
+                </tr>
+            </table>
+
+        <!-- Signature and Confirmation Table -->
+        <table class="signature-table">
+            <tr>
+                <th colspan="2">Contractor Confirmation:</th>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    I confirm that the installation has been completed as per the required specifications.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Contractor company name:</strong></td>
+                <td><span id="preview-company"></span></td>
+            </tr>
+            <tr>
+                <td><strong>Contractor representative name:</strong></td>
+                <td><span id="preview-rep"></span></td>
+            </tr>
+            <tr>
+                <td><strong>Signature:</strong></td>
+                <td></td>
+            </tr>
+            <tr>    
+                <td><strong>Date:</strong></td>
+                <td><span id="preview-date"></span></td>
+            </tr>
+        </table>
+
+        <button type="submit">Save Installation & Generate PDF</button>
+    </form>
+</div>
+
+<script>
+    // Live preview for signature lines
+    const companyInput = document.querySelector('[name="contractor_company"]');
+    const repInput = document.querySelector('[name="contractor_rep"]');
+    const dateInput = document.querySelector('[name="date_of_installation"]');
+    const companySpan = document.getElementById('preview-company');
+    const repSpan = document.getElementById('preview-rep');
+    const dateSpan = document.getElementById('preview-date');
+
+    function updatePreview() {
+        if (companyInput) companySpan.textContent = companyInput.value;
+        if (repInput) repSpan.textContent = repInput.value;
+        if (dateInput) dateSpan.textContent = dateInput.value;
+    }
+    companyInput?.addEventListener('input', updatePreview);
+    repInput?.addEventListener('input', updatePreview);
+    dateInput?.addEventListener('input', updatePreview);
+    updatePreview();
+</script>
+<script>
+    (function() {
+        // Function to update QTY display based on serial input
+        function updateQty(row) {
+            const serialInput = row.querySelector('td:nth-child(3) input');
+            const qtySpan = row.querySelector('.qty-display');
+            const isRequired = row.dataset.required === 'true';
+            
+            if (!serialInput || !qtySpan) return;
+            
+            const hasSerial = serialInput.value.trim() !== '';
+            
+            if (isRequired) {
+                qtySpan.textContent = hasSerial ? '1' : 'N/A';
+            } else {
+                // For optional devices, show '1' only if serial present, else 'N/A'
+                qtySpan.textContent = hasSerial ? '1' : 'N/A';
+            }
+        }
+        
+        // Set placeholders for optional devices
+        function setupPlaceholders() {
+            const optionalRows = document.querySelectorAll('#device-table tbody tr[data-required="false"]');
+            optionalRows.forEach(row => {
+                const serialInput = row.querySelector('td:nth-child(3) input');
+                const locationInput = row.querySelector('td:nth-child(5) input');
+                if (serialInput) {
+                    serialInput.placeholder = 'N/A';
+                    serialInput.classList.add('placeholder-center');  // add class for centered placeholder
+                }
+                if (locationInput) {
+                    locationInput.placeholder = 'N/A';
+                    locationInput.classList.add('placeholder-center');
+                }
+            });
+        }
+        
+        // Initialize all rows
+        function initDeviceTable() {
+            const rows = document.querySelectorAll('#device-table tbody tr');
+            rows.forEach(row => {
+                const serialInput = row.querySelector('td:nth-child(3) input');
+                if (serialInput) {
+                    serialInput.addEventListener('input', () => updateQty(row));
+                    updateQty(row);  // initial state
+                }
+            });
+            setupPlaceholders();
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDeviceTable);
+        } else {
+            initDeviceTable();
+        }
+    })();
+</script>
+<script>
+    (function() {
+        const form = document.querySelector('form');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        
+        // Function to reset the form
+        function resetForm() {
+            form.reset();
+            // Reset QTY displays to default
+            document.querySelectorAll('#device-table tbody tr').forEach(row => {
+                const qtySpan = row.querySelector('.qty-display');
+                const isRequired = row.dataset.required === 'true';
+                if (qtySpan) {
+                    qtySpan.textContent = isRequired ? '1' : 'N/A';
+                }
+            });
+            // Reset preview spans
+            updatePreview();
+        }
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            // Disable button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    alert(data.message);
+                    resetForm();
+                    // Open PDF in new tab
+                    if (data.pdf_url) {
+                        console.log('Opening PDF:', data.pdf_url);
+                        const newTab = window.open(data.pdf_url, '_blank');
+                        // If popup blocked, fallback to redirect in same tab
+                        if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+                            console.warn('Popup blocked. Opening in same tab.');
+                            window.location.href = data.pdf_url;
+                        }    
+                    } else {
+                        console.error('No pdf_url in response');
+                    }
+                } else {
+                    let errorMsg = 'Please correct the errors below.';
+                    if (data.errors) {
+                        errorMsg += '\n' + JSON.stringify(data.errors);
+                    }
+                    alert(errorMsg);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while saving. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Installation & Generate PDF';
+            }
+        });
+        
+        // Update preview function (already exists but ensure it's available)
+        const companyInput = document.querySelector('[name="contractor_company"]');
+        const repInput = document.querySelector('[name="contractor_rep"]');
+        const dateInput = document.querySelector('[name="date_of_installation"]');
+        const companySpan = document.getElementById('preview-company');
+        const repSpan = document.getElementById('preview-rep');
+        const dateSpan = document.getElementById('preview-date');
+        
+        window.updatePreview = function() {
+            if (companyInput) companySpan.textContent = companyInput.value;
+            if (repInput) repSpan.textContent = repInput.value;
+            if (dateInput) dateSpan.textContent = dateInput.value;
+        };
+        
+        companyInput?.addEventListener('input', updatePreview);
+        repInput?.addEventListener('input', updatePreview);
+        dateInput?.addEventListener('input', updatePreview);
+        updatePreview();
+    })();
+</script>
+</body>
+</html>
