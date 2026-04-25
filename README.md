@@ -138,7 +138,8 @@ pip install pytest pytest-django pytest-sugar
 pytest api/tests.py
 ```
 ## 🤝 Contributing
-Contributions are welcome! Please open an issue or submit a pull request.
+Contributions are welcome! Please [open an issue](https://github.com/jumagemini/dcc-report/issues "Project Issue") or submit a pull request.
 ## 💡 Need Help?
-If you encounter any issues, please open an issue with a clear description and steps to reproduce.
+If you encounter any issues, please [open an issue](https://github.com/jumagemini/dcc-report/issues "Project Issue") with a clear description and steps to reproduce.
 
+ 
