@@ -6,7 +6,7 @@ from .models import DCC, Institution, InstitutionPhoto
 
 @admin.register(DCC)
 class DCCAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'project_name', 'institution_count', 'excel_download')
+    list_display = ('id', 'name', 'project_name', 'institution_count', 'excel_download', 'stickers')
     search_fields = ('name', 'project_name')
     actions = ['download_excel_for_selected']
 
@@ -17,7 +17,7 @@ class DCCAdmin(admin.ModelAdmin):
     def excel_download(self, obj):
         url = reverse('dcc_excel', args=[obj.pk])
         return format_html('<a href="{}" class="button" style="white-space:nowrap;">📥 Download Excel</a>', url)
-    excel_download.short_description = 'Excel Report'
+    excel_download.short_description = 'DCC Excel Report'
     excel_download.allow_tags = True
 
     def download_excel_for_selected(self, request, queryset):
@@ -28,6 +28,10 @@ class DCCAdmin(admin.ModelAdmin):
             self.message_user(request, "Please select exactly one DCC to download the Excel report.", level='warning')
     download_excel_for_selected.short_description = "Download Excel for selected DCC"
 
+    def stickers(self, obj):
+        url = reverse('dcc_stickers', args=[obj.pk])
+        return format_html('<a href="{}" class="button" style="white-space:nowrap;">📥 Download Labels</a>', url)
+    stickers.short_description = 'DCC Device Labels (DOCX)'
 
 @admin.register(Institution)
 class InstitutionAdmin(admin.ModelAdmin):
