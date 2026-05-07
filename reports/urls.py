@@ -6,4 +6,5 @@ urlpatterns = [
     path('institution/<int:pk>/pdf/', views.generate_institution_pdf, name='institution_pdf'),
     path('institution/<int:pk>/preview/', views.preview_institution_pdf, name='institution_pdf_preview'),
     path('dcc/<int:dcc_id>/excel/', views.generate_dcc_excel, name='dcc_excel'),
+    path('dcc/<int:dcc_id>/stickers/', views.download_dcc_stickers, name='dcc_stickers'),
 ]
