@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.urls import reverse
 from weasyprint import HTML
 from .models import DCC, Institution, InstitutionPhoto
 from .forms import InstitutionForm, PhotoUploadForm
+from .utils import generate_dcc_stickers_docx
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment, Border, Side
@@ -541,3 +542,13 @@ def generate_institution_pdf(request, pk):
     response['Content-Disposition'] = f'inline; filename="{filename}"'
     return response
 
+def download_dcc_stickers(request, dcc_id):
+    dcc = get_object_or_404(DCC, pk=dcc_id)
+    buffer = generate_dcc_stickers_docx(dcc)
+    filename = f"{dcc.name.replace(' ', '_')}_Device_Stickers.docx"
+    response = FileResponse(
+        buffer,
+        content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
