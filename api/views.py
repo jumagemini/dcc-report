@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import render, get_object_or_404
-from django.http import FileResponse
+from django.http import FileResponse, JsonResponse
 from reports.models import DCC, Institution, InstitutionPhoto
 from reports.views import generate_institution_pdf, generate_dcc_excel
 from .serializers import DCCSerializer, InstitutionSerializer, InstitutionPhotoSerializer
@@ -70,3 +70,5 @@ class InstitutionViewSet(viewsets.ModelViewSet):
 
 def api_demo(request):
     return render(request, 'api/demo.html')
+
+
