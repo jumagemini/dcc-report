@@ -1,0 +1,1074 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    .file-name-display {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+        word-break: break-all;
+    }
+    /* Move all original styles here EXCEPT body rules */
+    .project-no-cell {
+        white-space: nowrap;
+    }
+    .project-no-cell input {
+        display: inline-block;
+        width: 50%;
+        min-width: 50%;
+        border: 1px solid #aaa;
+        padding: 2px 4px;
+        margin-left: 6px;
+        font-size: inherit;
+    }
+    /* Center QTY column */
+    #device-table td:nth-child(4) {
+        text-align: center;
+        vertical-align: middle;
+    }
+    /* ... paste all other CSS from the original file here ... */
+    /* KEEP only the rules that are NOT related to the page shell.
+       Remove: body { ... }, .form-container { ... } – we will redefine them inside the content block. */
+    /* Center placeholder text for N/A */
+        #device-table td:nth-child(3) input::placeholder,
+        #device-table td:nth-child(5) input::placeholder {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+        }
+        /* Center text in QTY column */
+        .col-qty, .qty-display {
+            text-align: center;
+        }
+
+        /* Center placeholder text inside Serial Number inputs */
+        input[type="text"].placeholder-center::placeholder {
+            text-align: center;
+        }
+
+        /* Alternative: apply directly to all inputs in device table */
+        #device-table td:nth-child(3) input,
+        #device-table td:nth-child(5) input {
+            text-align: left;   /* keep normal text left-aligned */
+        }
+
+        /* Center placeholder only */
+        #device-table td:nth-child(3) input::placeholder {
+            text-align: center;
+        }
+        input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+        .qty-display {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+        }
+        .photo-table td {
+            padding: 5px;
+            border: none;
+            vertical-align: middle;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #222;
+        }
+        .details-table td {
+            border: 1px solid #222;
+            padding: 8px 6px;
+            vertical-align: middle;
+            box-sizing: border-box;
+        }
+        .details-table td:first-child,
+        .details-table td:nth-child(3) {
+            width: 20%;
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        .details-table td:nth-child(2),
+        .details-table td:nth-child(4) {
+            width: 30%;
+        }
+        .details-table input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .details-table input:focus {
+            border-bottom: 1px solid #0078d7;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        h2, h3 {
+            margin: 5px 0;
+            font-weight: 600;
+        }
+        h2 {
+            font-size: 20px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        h3 {
+            font-size: 16px;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+            table-layout: fixed;
+            box-sizing: border-box;
+            border: 1px solid #222;  /* ensure outer border is visible */
+        }
+        th, td {
+            border: 1px solid #222;
+            padding: 10px 6px;
+            vertical-align: top;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+        th {
+            background-color: #e0e0e0;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;       /* prevent header text wrapping */
+        }
+        /* Column widths */
+        .col-item-no { width: 8%; }
+        .col-device-name { width: 20%; }
+        .col-serial { width: 32%; }
+        .col-qty { width: 8%; }
+        .col-location { width: 32%; }
+
+        /* If you want Quantity to be the only no-wrap, use class instead of th rule */
+        /* .no-wrap { white-space: nowrap; } */
+
+        td input, td select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 4px 0;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        td input:focus {
+            border-bottom: 1px solid #0078d7;
+        }
+        .info-line {
+            margin: 12px 0;
+            font-size: 15px;
+        }
+        .info-line strong {
+            display: inline-block;
+            min-width: 220px;
+        }
+        .photo-upload {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .photo-upload label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        button {
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        .errorlist {
+            color: #d32f2f;
+            font-size: 13px;
+            list-style: none;
+            padding: 0;
+            margin: 2px 0 0;
+        }
+        .field-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        .optional-badge {
+            color: #666;
+            font-weight: normal;
+            font-style: italic;
+            font-size: 12px;
+        }
+        /* Signature table inherits same column styles */
+        .signature-table {
+            margin-top: 30px;
+            table-layout: fixed;
+        }
+        .signature-table td:first-child {
+            width: 40%;
+        }
+        /* ---------- Mobile-friendly additions (append to your style block) ---------- */
+
+        @media (max-width: 768px) {
+            /* Override the fixed A4 dimensions – make it fluid */
+            .form-container {
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 10px !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+
+            /* Tables that overflow get horizontal scroll */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* But we keep device-table as a normal table because it has important column widths */
+            #device-table {
+                display: table;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* Let long table cells wrap – only for non‑device tables if needed */
+            .details-table td,
+            .signature-table td {
+                white-space: normal;
+            }
+
+            /* Make inputs and selects bigger for touch */
+            td input, td select {
+                font-size: 16px !important;  /* prevents iOS zoom on focus */
+                padding: 10px 4px !important;
+            }
+
+            /* Buttons full width */
+            button {
+                width: 100%;
+                padding: 14px;
+            }
+
+            /* Reduce overall body padding */
+            body {
+                padding: 0;
+            }
+
+            /* The grey wrapper should be full width */
+            .container, .form-container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .project-no-cell {
+            white-space: normal;           /* allow the label and input to wrap if absolutely necessary */
+            }
+
+            .project-no-cell input {
+                min-width: 0 !important;      /* override the default 80px */
+                max-width: 100%;              /* never exceed the cell */
+                width: 100%;                  /* fill the cell like other inputs */
+                display: block;               /* match the block‑level behaviour */
+                box-sizing: border-box;       /* include padding in width */
+                margin-left: 0;               /* no extra indent */
+                padding: 4px 2px;             /* comfortable touch size */
+                
+            }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- We recreate the A4-sized centred container without interfering with Bootstrap -->
+<div style="display: flex; justify-content: center; padding: 20px; background-color: #e6e6e6;">
+    <div class="form-container" style="
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        background: white;
+        padding: 15mm 15mm;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        border-radius: 2px;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    ">
+    <!-- Mode switcher -->
+    <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+        <a href="{% url 'institution_create' dcc.id %}" class="btn btn-outline-secondary me-2">📁 Passive Installation</a>
+        <a href="{% url 'institution_create_active' dcc.id %}" class="btn btn-primary">📸 Active Installation</a>
+    </div>
+        <!-- The entire form now goes here, exactly as before -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <!-- Logo and project info table -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
+                <tr>
+                    <td rowspan="2" style="width: 15%; border: 1px solid #000; text-align: left; vertical-align: middle; padding: 5px;">
+                        <img src="{% static 'images/kplc.png' %}" alt="Logo Left" style="height: 70px;">
+                    </td>
+                    <td style="width: 50%; border: 1px solid #000; padding: 8px; font-weight: bold; font-size: 12pt; text-align: left; vertical-align: middle;">
+                        PROJECT NAME: {{ dcc.project_name }}
+                    </td>
+                    <td rowspan="2" style="width: 15%; border: 1px solid #000; text-align: right; vertical-align: middle; padding: 5px;">
+                        <img src="{% static 'images/ict.png' %}" alt="Logo Right" style="height: 70px;">
+                    </td>
+                </tr>
+                <tr>
+                    <td class="project-no-cell" style="border: 1px solid #000; padding: 8px; font-weight: bold; font-size: 12pt; text-align: left; vertical-align: middle;">
+                        PROJECT NO.: {{ form.project_no }}
+                    </td>
+                </tr>
+            </table>
+
+            <table><tr><td><h3><center>DEVICE INSTALLATION FORM FOR ACTIVE DEVICES INSTALLATION</center></h3></td></tr></table>
+
+            <!-- Details Table -->
+            <table class="details-table">
+                <tr>
+                    <td><strong>DCC name:</strong></td>
+                    <td>{{ dcc.name }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Institution name:</strong></td>
+                    <td>{{ form.name }}{{ form.name.errors }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Date of Installation:</strong></td>
+                    <td>{{ form.date_of_installation }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Contractor company name:</strong></td>
+                    <td>{{ form.contractor_company }}</td>
+                </tr>
+                <tr>
+                    <td><strong>Contractors' representative:</strong></td>
+                    <td>{{ form.contractor_rep }}</td>
+                </tr>
+                <tr>
+                    <td><strong>ICTA representative:</strong></td>
+                    <td>{{ form.icta_rep }}</td>
+                </tr>
+            </table>
+
+            <!-- Device table, photo uploads, signature, etc. – include everything exactly as in the original -->
+            <!-- ... paste the rest of your form content here ... -->
+            <!-- Device Table with fixed column widths -->
+        <!-- Device Table with dynamic QTY and N/A placeholders -->
+        <table id="device-table">
+            <thead>
+                <tr>
+                    <th class="col-item-no">No.</th>
+                    <th class="col-device-name">Device Name</th>
+                    <th class="col-serial">Serial Number</th>
+                    <th class="col-qty no-wrap">QTY</th>
+                    <th class="col-location">Location Installed</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ONU (mandatory) -->
+                <tr data-device="ONU" data-required="true">
+                    <td class="col-item-no">1</td>
+                    <td class="col-device-name">ONU</td>
+                    <td class="col-serial">{{ form.onu_serial }}</td>
+                    <td class="col-qty"><span class="qty-display">1</span></td>
+                    <td class="col-location">{{ form.onu_location }}</td>
+                </tr>
+                <!-- Indoor AP1 (mandatory) -->
+                <tr data-device="AP1" data-required="true">
+                    <td>2</td>
+                    <td>INDOOR AP1</td>
+                    <td>{{ form.indoor_ap1_serial }}</td>
+                    <td><span class="qty-display">1</span></td>
+                    <td>{{ form.indoor_ap1_location }}</td>
+                </tr>
+                <!-- Indoor AP2 (optional) -->
+                <tr data-device="AP2" data-required="false">
+                    <td>3</td>
+                    <td>INDOOR AP2 <span class="optional-badge"></span></td>
+                    <td>{{ form.indoor_ap2_serial }}</td>
+                    <td><span class="qty-display">N/A</span></td>
+                    <td>{{ form.indoor_ap2_location }}</td>
+                </tr>
+                <!-- Indoor AP3 (optional) -->
+                <tr data-device="AP3" data-required="false">
+                    <td>4</td>
+                    <td>INDOOR AP3 <span class="optional-badge"></span></td>
+                    <td>{{ form.indoor_ap3_serial }}</td>
+                    <td><span class="qty-display">N/A</span></td>
+                    <td>{{ form.indoor_ap3_location }}</td>
+                </tr>
+                <!-- Outdoor AP1 (mandatory) -->
+                <tr data-device="OUT" data-required="true">
+                    <td>5</td>
+                    <td>OUTDOOR AP1</td>
+                    <td>{{ form.outdoor_ap_serial }}</td>
+                    <td><span class="qty-display">1</span></td>
+                    <td>{{ form.outdoor_ap_location }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Additional Details -->
+       
+
+        <!-- Photo Upload Section (Active) -->
+            <h4>Before Installation Photos</h4>
+            <table class="photo-table">
+                <tr>
+                    <td>{{ photo_form.before_onu.label_tag }}</td>
+                    <td><input type="file" name="before_onu" capture="environment" accept="image/jpeg,image/png">
+                         <span class="file-name-display"></span>
+                    </td>
+                    <td>{{ photo_form.before_ap1.label_tag }}</td>
+                    <td><input type="file" name="before_ap1" capture="environment" accept="image/jpeg,image/png">
+                         <span class="file-name-display"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.before_ap2.label_tag }}</td>
+                    <td><input type="file" name="before_ap2" capture="environment" accept="image/jpeg,image/png">
+                         <span class="file-name-display"></span>
+                    </td>
+                    <td>{{ photo_form.before_ap3.label_tag }}</td>
+                    <td><input type="file" name="before_ap3" capture="environment" accept="image/jpeg,image/png">
+                         <span class="file-name-display"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.before_out.label_tag }}</td>
+                    <td><input type="file" name="before_out" capture="environment" accept="image/jpeg,image/png">
+                         <span class="file-name-display"></span>
+                    </td>
+                    <td></td><td></td>
+                </tr>
+            </table>
+
+            <h4>After Installation Photos</h4>
+            <table class="photo-table">
+                <tr>
+                    <td>{{ photo_form.after_onu.label_tag }}</td>
+                    <td><input type="file" name="after_onu" capture="environment" accept="image/*">
+                         <span class="file-name-display"></span>
+                    </td>
+                    <td>{{ photo_form.after_ap1.label_tag }}</td>
+                    <td><input type="file" name="after_ap1" capture="environment" accept="image/*">
+                         <span class="file-name-display"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.after_ap2.label_tag }}</td>
+                    <td><input type="file" name="after_ap2" capture="environment" accept="image/*">
+                         <span class="file-name-display"></span>
+                    </td>
+                    <td>{{ photo_form.after_ap3.label_tag }}</td>
+                    <td><input type="file" name="after_ap3" capture="environment" accept="image/*">
+                         <span class="file-name-display"></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{ photo_form.after_out.label_tag }}</td>
+                    <td><input type="file" name="after_out" capture="environment" accept="image/*">
+                         <span class="file-name-display"></span>
+                    </td>
+                    <td></td><td></td>
+                </tr>
+            </table>    
+
+        <!-- Signature and Confirmation Table -->
+        <table class="signature-table">
+            <tr>
+                <th colspan="2">Contractor Confirmation:</th>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    I confirm that the installation has been completed as per the required specifications.
+                </td>
+            </tr>
+            <tr>
+                <td><strong>Contractor company name:</strong></td>
+                <td><span id="preview-company"></span></td>
+            </tr>
+            <tr>
+                <td><strong>Contractor representative name:</strong></td>
+                <td><span id="preview-rep"></span></td>
+            </tr>
+           <tr>
+                <td><strong>Signature:</strong></td>
+                <td>
+                    {% if institution.signature %}
+                        <p><strong>Existing signature:</strong><br>
+                        <img src="{{ institution.signature.url }}" style="max-height: 60px; border: 1px solid #ccc;"></p>
+                    {% elif user.userprofile.signature %}
+                        <p><strong>Your default signature:</strong><br>
+                        <img src="{{ user.userprofile.signature.url }}" style="max-height: 60px; border: 1px solid #ccc;"></p>
+                    {% endif %}
+                    <canvas id="signature-canvas" width="400" height="150" style="border: 1px solid #000; border-radius: 4px; touch-action: none;"></canvas>
+                    <br>
+                    <button type="button" id="clear-signature" class="btn btn-sm btn-outline-secondary mt-1">Clear</button>
+                    <input type="hidden" name="signature_image" id="signature-image-data">
+                </td>
+            </tr>
+            <tr>    
+                <td><strong>Date:</strong></td>
+                <td><span id="preview-date"></span></td>
+            </tr>
+         </table>
+                <div id="success-message" style="display:none; margin-top:15px; padding:10px; background:#d4edda; border:1px solid #c3e6cb; border-radius:4px;">
+                    <strong>✅ Installation saved successfully.</strong><br>
+                    <a id="pdf-link" href="#" target="_blank">📄 View generated PDF (opens in new tab)</a>
+                </div>
+                <input type="hidden" name="dcc_name" value="{{ dcc.name }}">
+            <button type="submit">Save Installation & Generate PDF</button>
+        </form>
+        <!-- Error Modal -->
+            <div class="modal fade" id="photoErrorModal" tabindex="-1" aria-labelledby="photoErrorModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning">
+                            <h5 class="modal-title" id="photoErrorModalLabel">⚠️ Missing Serial Number</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="photoErrorModalBody">
+                            <!-- Error message(s) will be inserted here -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/db-helpers.js' %}"></script>
+<script src="{% static 'js/offline-handler.js' %}"></script>
+<!-- Keep all your existing JavaScript here -->
+<script>
+    // Live preview for signature lines
+    const companyInput = document.querySelector('[name="contractor_company"]');
+    const repInput = document.querySelector('[name="contractor_rep"]');
+    const dateInput = document.querySelector('[name="date_of_installation"]');
+    const companySpan = document.getElementById('preview-company');
+    const repSpan = document.getElementById('preview-rep');
+    const dateSpan = document.getElementById('preview-date');
+
+    function updatePreview() {
+        if (companyInput) companySpan.textContent = companyInput.value;
+        if (repInput) repSpan.textContent = repInput.value;
+        if (dateInput) dateSpan.textContent = dateInput.value;
+    }
+    companyInput?.addEventListener('input', updatePreview);
+    repInput?.addEventListener('input', updatePreview);
+    dateInput?.addEventListener('input', updatePreview);
+    updatePreview();
+</script>
+<script>
+    (function() {
+        // Function to update QTY display based on serial input
+        function updateQty(row) {
+            const serialInput = row.querySelector('td:nth-child(3) input');
+            const qtySpan = row.querySelector('.qty-display');
+            const isRequired = row.dataset.required === 'true';
+            
+            if (!serialInput || !qtySpan) return;
+            
+            const hasSerial = serialInput.value.trim() !== '';
+            
+            if (isRequired) {
+                qtySpan.textContent = hasSerial ? '1' : 'N/A';
+            } else {
+                // For optional devices, show '1' only if serial present, else 'N/A'
+                qtySpan.textContent = hasSerial ? '1' : 'N/A';
+            }
+        }
+        
+        // Set placeholders for optional devices
+        function setupPlaceholders() {
+            const optionalRows = document.querySelectorAll('#device-table tbody tr[data-required="false"]');
+            optionalRows.forEach(row => {
+                const serialInput = row.querySelector('td:nth-child(3) input');
+                const locationInput = row.querySelector('td:nth-child(5) input');
+                if (serialInput) {
+                    serialInput.placeholder = 'N/A';
+                    serialInput.classList.add('placeholder-center');  // add class for centered placeholder
+                }
+                if (locationInput) {
+                    locationInput.placeholder = 'N/A';
+                    locationInput.classList.add('placeholder-center');
+                }
+            });
+        }
+        
+        // Initialize all rows
+        function initDeviceTable() {
+            const rows = document.querySelectorAll('#device-table tbody tr');
+            rows.forEach(row => {
+                const serialInput = row.querySelector('td:nth-child(3) input');
+                if (serialInput) {
+                    serialInput.addEventListener('input', () => updateQty(row));
+                    updateQty(row);  // initial state
+                }
+            });
+            setupPlaceholders();
+        }
+        
+        // Run when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDeviceTable);
+        } else {
+            initDeviceTable();
+        }
+    })();
+</script>
+<script>
+    (function() {
+        const form = document.querySelector('.form-container form');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        // Function to reset the form
+        function resetForm() {
+            form.reset();
+            // Reset QTY displays to default
+            document.querySelectorAll('#device-table tbody tr').forEach(row => {
+                const qtySpan = row.querySelector('.qty-display');
+                const isRequired = row.dataset.required === 'true';
+                if (qtySpan) {
+                    qtySpan.textContent = isRequired ? '1' : 'N/A';
+                }
+            });
+            // Reset preview spans
+            updatePreview();
+        }
+        
+        form.addEventListener('submit', async function(e) {
+            // If offline, let the form submit natively – offline handler will catch it
+             if (!navigator.onLine) return;
+            // If this is an edit form, allow normal submission
+            if (form.action.includes('/edit/')) {
+                return; // submit normally, no AJAX
+            }
+
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            // Disable button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resetForm();
+                    const msgDiv = document.getElementById('success-message');
+                    const pdfLink = document.getElementById('pdf-link');
+                    pdfLink.href = data.pdf_url;
+                    msgDiv.style.display = 'block';
+                    // Auto‑hide after 20 seconds
+                    setTimeout(() => { msgDiv.style.display = 'none'; }, 20000);
+    
+                    // Also open the PDF in a new tab automatically if possible
+                    const newTab = window.open(data.pdf_url, '_blank');
+
+                    if (!newTab || newTab.closed) {
+                        // Popup blocked – the user can still use the link above
+                        console.warn('Automatic new tab blocked. Use the link to open the PDF.');   
+                    }    
+                     else {
+                        console.error('No pdf_url in response');
+                    }
+                } else {
+                    let errorMsg = 'Please correct the errors below.';
+                    if (data.errors) {
+                        errorMsg += '\n' + JSON.stringify(data.errors);
+                    }
+                    alert(errorMsg);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while saving. Please try again.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Installation & Generate PDF';
+            }
+        });
+        
+        // Update preview function (already exists but ensure it's available)
+        const companyInput = document.querySelector('[name="contractor_company"]');
+        const repInput = document.querySelector('[name="contractor_rep"]');
+        const dateInput = document.querySelector('[name="date_of_installation"]');
+        const companySpan = document.getElementById('preview-company');
+        const repSpan = document.getElementById('preview-rep');
+        const dateSpan = document.getElementById('preview-date');
+        
+        window.updatePreview = function() {
+            if (companyInput) companySpan.textContent = companyInput.value;
+            if (repInput) repSpan.textContent = repInput.value;
+            if (dateInput) dateSpan.textContent = dateInput.value;
+        };
+        
+        companyInput?.addEventListener('input', updatePreview);
+        repInput?.addEventListener('input', updatePreview);
+        dateInput?.addEventListener('input', updatePreview);
+        updatePreview();
+    })();
+</script>
+<script>
+(function() {
+    // Mapping of photo field names to the corresponding serial number field names
+    const photoToSerial = {
+        'before_onu': 'onu_serial',
+        'before_ap1': 'indoor_ap1_serial',
+        'before_ap2': 'indoor_ap2_serial',
+        'before_ap3': 'indoor_ap3_serial',
+        'before_out': 'outdoor_ap_serial',
+        'after_onu': 'onu_serial',
+        'after_ap1': 'indoor_ap1_serial',
+        'after_ap2': 'indoor_ap2_serial',
+        'after_ap3': 'indoor_ap3_serial',
+        'after_out': 'outdoor_ap_serial',
+    };
+
+    // Mapping of serial field names to display names
+    const deviceNames = {
+        'onu_serial': 'ONU',
+        'indoor_ap1_serial': 'INDOOR AP1',
+        'indoor_ap2_serial': 'INDOOR AP2',
+        'indoor_ap3_serial': 'INDOOR AP3',
+        'outdoor_ap_serial': 'OUTDOOR AP1',
+    };
+
+    const form = document.querySelector('.form-container form');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        const errorMessages = [];
+
+        for (const [photoField, serialField] of Object.entries(photoToSerial)) {
+            const photoInput = form.querySelector(`[name="${photoField}"]`);
+            const serialInput = form.querySelector(`[name="${serialField}"]`);
+
+            // Only check if a photo file was selected and the serial is empty
+            if (photoInput && photoInput.files.length > 0) {
+                if (serialInput && serialInput.value.trim() === '') {
+                    const deviceName = deviceNames[serialField] || serialField;
+                    errorMessages.push(`📸 <strong>${deviceName}</strong>: Please enter the Serial Number before uploading the photo.`);
+                }
+            }
+        }
+
+        if (errorMessages.length > 0) {
+            e.preventDefault();   // stop form submission / AJAX
+            const modalBody = document.getElementById('photoErrorModalBody');
+            modalBody.innerHTML = errorMessages.join('<br>');
+            const modal = new bootstrap.Modal(document.getElementById('photoErrorModal'));
+            modal.show();
+        }
+    });
+})();
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const photoInputs = document.querySelectorAll('.photo-table input[type="file"]');
+        photoInputs.forEach(input => {
+            const displaySpan = input.closest('td').querySelector('.file-name-display');
+            if (!displaySpan) return;
+
+            input.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    displaySpan.textContent = this.files[0].name;
+                    displaySpan.style.color = '#333';
+                } else {
+                    displaySpan.textContent = '';
+                }
+            });
+        });
+    });
+</script>
+<script>
+(function() {
+    // -----------------------------------------------------------------
+    // 1. Mapping of BEFORE photo field names to serial field names
+    //    (after photos are not used for OCR)
+    // -----------------------------------------------------------------
+    const photoToSerial = {
+        'before_onu': 'onu_serial',
+        'before_ap1': 'indoor_ap1_serial',
+        'before_ap2': 'indoor_ap2_serial',
+        'before_ap3': 'indoor_ap3_serial',
+        'before_out': 'outdoor_ap_serial',
+    };
+
+    // -----------------------------------------------------------------
+    // 2. Helper: convert a serial field name to a device type code
+    // -----------------------------------------------------------------
+    function getDeviceType(serialFieldName) {
+        const map = {
+            'onu_serial': 'ONU',
+            'indoor_ap1_serial': 'AP1',
+            'indoor_ap2_serial': 'AP2',
+            'indoor_ap3_serial': 'AP3',
+            'outdoor_ap_serial': 'OUT',
+        };
+        return map[serialFieldName] || 'AP1';
+    }
+
+    // -----------------------------------------------------------------
+    // 3. Core function: upload image, poll OCR, fill serial field
+    // -----------------------------------------------------------------
+    async function handleImage(file, serialFieldName) {
+        const deviceType = getDeviceType(serialFieldName);
+
+        // Visual feedback: disable submit button while processing
+        const form = document.querySelector('.form-container form');   // scope to the institution form
+        const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+        //const submitBtn = document.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = `Reading ${deviceType} serial number…`;
+        }
+
+        // --- 3a. Upload image to OCR endpoint ---
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('device_type', deviceType);   // tells the backend which patterns to use
+
+        let taskId;
+        try {
+            const response = await fetch('/api/ocr/', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await response.json();
+            if (data.task_id) {
+                taskId = data.task_id;
+            } else {
+                throw new Error('No task ID returned');
+            }
+        } catch (error) {
+            console.error('OCR upload failed:', error);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Save Installation & Generate PDF';
+            }
+            return;
+        }
+
+        // --- 3b. Poll the task status every 2 seconds (up to 30 s) ---
+        const maxPolls = 15;
+        let polls = 0;
+        const pollInterval = setInterval(async () => {
+            polls++;
+            try {
+                const statusResponse = await fetch(`/api/ocr/status/${taskId}/`);
+                const statusData = await statusResponse.json();
+
+                if (statusData.status === 'complete') {
+                    clearInterval(pollInterval);
+
+                    // Fill the serial number input with the first result
+                    const serials = statusData.serials || [];
+                    const serialInput = document.querySelector(`[name="${serialFieldName}"]`);
+                    if (serialInput && serials.length > 0) {
+                        serialInput.value = serials[0];
+                        // Trigger QTY update (if the dynamic QTY script is present)
+                        serialInput.dispatchEvent(new Event('input'));
+                    } else {
+                        // 👇 New user‑friendly message
+                        alert('No serial number detected. Please retake the photo, ensuring the device label is clearly visible.');
+                    }
+
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Save Installation & Generate PDF';
+                    }
+                } else if (statusData.status === 'failed') {
+                    clearInterval(pollInterval);
+                    console.error('OCR processing failed:', statusData.error);
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Save Installation & Generate PDF';
+                    }
+                } else if (polls >= maxPolls) {
+                    clearInterval(pollInterval);
+                    console.warn('OCR timed out');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Save Installation & Generate PDF';
+                    }
+                }
+                // If still 'pending', do nothing – wait for next poll
+
+            } catch (error) {
+                clearInterval(pollInterval);
+                console.error('OCR status check failed:', error);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Save Installation & Generate PDF';
+                }
+            }
+        }, 2000);
+    }
+
+    // -----------------------------------------------------------------
+    // 4. Attach event listeners to all BEFORE photo file inputs
+    // -----------------------------------------------------------------
+    function initOCR() {
+        for (const [photoField, serialField] of Object.entries(photoToSerial)) {
+            const photoInput = document.querySelector(`[name="${photoField}"]`);
+            if (!photoInput) continue;
+
+            photoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    handleImage(file, serialField);
+                }
+            });
+        }
+    }
+
+    // Run when the DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOCR);
+    } else {
+        initOCR();
+    }
+})();
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('signature-canvas');
+        if (!canvas) return;
+
+        const signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgb(255, 255, 255)',
+            penColor: 'rgb(0, 0, 0)',
+            minWidth: 2,      // ← thicker, even at fastest stroke
+            maxWidth: 4.5     // ← bolder when drawing slowl
+        });
+
+        // Pre‑load user's default signature if available
+        const defaultSignatureUrl = "{% if user.userprofile.signature %}{{ user.userprofile.signature.url }}{% endif %}";
+        if (defaultSignatureUrl) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                // The SignaturePad will treat this as existing drawing
+                // We need to reinitialise the pad to recognise the image as part of the canvas
+                signaturePad.clear(); // clear first, then draw
+                signaturePad.fromDataURL(canvas.toDataURL());
+            };
+            img.src = defaultSignatureUrl;
+        }
+
+        // Clear button
+        document.getElementById('clear-signature').addEventListener('click', function() {
+            signaturePad.clear();
+        });
+
+        // Helper: convert canvas to Blob and append to FormData
+        async function addSignatureToFormData(formData) {
+            if (signaturePad.isEmpty()) return;   // no signature drawn
+
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (blob) {
+                formData.append('signature_image', blob, 'signature.png');
+            }
+        }
+
+        // Find the institution form and intercept its submission
+        const form = document.querySelector('.form-container form');
+        if (!form) return;
+
+        // For the Active/Passive forms that use AJAX (the third script block),
+        // we need to hook into the already existing submit listener.
+        // A clean approach is to wrap the original submit handler.
+        // Instead of modifying the existing complex script, we can add a
+        // new event listener that runs before the other, and modifies
+        // the FormData. However, the existing script already creates a
+        // FormData from the form and sends it. We need to ensure our
+        // signature blob is added to that FormData.
+
+        // The simplest way: override the form's submit event with a
+        // capturing phase listener, but we'll keep it straightforward
+        // by modifying the original submit logic if possible.
+
+        // Since the existing AJAX logic (in institution_form.html)
+        // creates `new FormData(form)`, and then later we can't add to
+        // it unless we modify that script. To avoid breaking your
+        // current code, we'll add a hidden input field that stores the
+        // base64 of the signature. The existing AJAX will include that
+        // field automatically. Then, in the view, we decode the base64
+        // and save as an image. This avoids messing with the AJAX.
+
+        // We'll update the hidden input whenever the signature changes.
+        function updateHiddenInput() {
+            if (!signaturePad.isEmpty()) {
+                const dataUrl = signaturePad.toDataURL('image/png');
+                document.getElementById('signature-image-data').value = dataUrl;
+            } else {
+                document.getElementById('signature-image-data').value = '';
+            }
+        }
+
+        // Update on canvas stroke end
+        canvas.addEventListener('pointerup', updateHiddenInput);
+        // Also when clearing
+        document.getElementById('clear-signature').addEventListener('click', function() {
+            signaturePad.clear();
+            document.getElementById('signature-image-data').value = '';
+        });
+
+        // If the form is reset (after successful submission), clear the canvas
+        const resetForm = window.resetForm || function() {};  // existing reset function
+        const originalReset = resetForm;
+        window.resetForm = function() {
+            signaturePad.clear();
+            document.getElementById('signature-image-data').value = '';
+            originalReset();
+        };
+    });
+</script>
+{% endblock %}
