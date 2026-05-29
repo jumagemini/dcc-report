@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h3>📬 Notifications</h3>
+    {% if notifications %}
+        <div class="list-group">
+            {% for notification in notifications %}
+                <div class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-primary{% endif %}">
+                    {% if notification.institution %}
+                        <span class="badge bg-info text-dark mb-2">
+                            🏫 {{ notification.institution.name }}
+                            {% if notification.institution.dcc %}
+                                ({{ notification.institution.dcc.name }})
+                            {% endif %}
+                        </span>
+                        <br>
+                    {% endif %}
+                    <p class="mb-1">{{ notification.message }}</p>
+                    <small class="text-muted">
+                        {{ notification.created_at|date:"d/m/Y H:i" }}
+                        {% if notification.institution %}
+                            – <a href="{% url 'institution_list' notification.institution.dcc.id %}" class="text-decoration-none">View institution list</a>
+                        {% endif %}
+                    </small>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No notifications yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
