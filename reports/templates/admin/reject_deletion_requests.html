@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Reject Deletion Requests</h2>
+<p>You are about to reject the following deletion requests:</p>
+<ul>
+    {% for req in requests %}
+        <li>{{ req.institution.name }} – requested by {{ req.requested_by }}</li>
+    {% endfor %}
+</ul>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="ids" value="{{ ids }}">
+    <button type="submit" class="button">Reject with Reason</button>
+</form>
+{% endblock %}

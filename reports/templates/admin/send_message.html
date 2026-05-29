@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h2>Send notification to institution creator(s)</h2>
+<p>You are sending a message to the creators of the following institutions:</p>
+<ul>
+    {% for inst in institutions %}
+        <li>{{ inst.name }} – created by {{ inst.created_by|default:"(unknown)" }}</li>
+    {% endfor %}
+</ul>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="ids" value="{{ ids }}">
+    <button type="submit" class="button">Send Message</button>
+</form>
+{% endblock %}
