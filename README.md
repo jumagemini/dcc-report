@@ -215,7 +215,8 @@ pytest api/tests.py
 ```
 ## 🤝 Contributing
 Contributions are welcome! Please [open an issue](https://github.com/jumagemini/dcc-report/issues "Project Issue") or submit a pull request.
-## 💡 Need Help?
-If you encounter any issues, please [open an issue](https://github.com/jumagemini/dcc-report/issues "Project Issue") with a clear description and steps to reproduce.
 
- 
+## 💡 Need Help?
+
+Looking for a developer for an app? Feel free to reach out via email:  
+[Dennis Juma](mailto:jumagemini@gmail.com)
