@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-jg-l0svla0mp26q(@w6$u2izxez92_9!l$(9@2oy2uj4o8@#)!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['jumaspay.pythonanywhere.com','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['jumaspay.pythonanywhere.com','localhost','127.0.0.1', '*',]
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'drf_yasg', # API Documentation
     'corsheaders', # Allow External Clients Access
     'reports', # DCC App
+    'celery',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
@@ -63,13 +64,15 @@ ROOT_URLCONF = 'field_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'], # make sure this includes your base.html
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'reports.context_processors.user_dccs',   # 👈 add this
+                'reports.context_processors.unread_notifications',
             ],
         },
     },
@@ -132,7 +135,11 @@ REST_FRAMEWORK = {
 }
 
 
+LOGIN_URL = 'login'
+LOGOUT_REDIRECT_URL = 'dashboard'
 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
