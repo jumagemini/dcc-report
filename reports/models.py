@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
 
 class DCC(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -6,6 +8,28 @@ class DCC(models.Model):
 
     def __str__(self):
         return self.name
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    allowed_dccs = models.ManyToManyField('DCC', blank=True)
+    signature = models.ImageField(upload_to='user_signatures/', blank=True, null=True)
+
+    def __str__(self):
+        return self.user.username    
+    
+class UserDCCLimit(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    dcc = models.ForeignKey(DCC, on_delete=models.CASCADE)
+    max_institutions = models.PositiveIntegerField(
+        null=True, blank=True,
+        help_text="Leave empty for unlimited."
+    )
+
+    class Meta:
+        unique_together = ('user', 'dcc')
+
+    def __str__(self):
+        return f"{self.user.username} – {self.dcc.name} (max: {self.max_institutions or '∞'})"    
 
 class Institution(models.Model):
     project_no = models.CharField(max_length=50, blank=True, verbose_name="Project No.", default='')
@@ -15,6 +39,7 @@ class Institution(models.Model):
     contractor_company = models.CharField(max_length=200)
     contractor_rep = models.CharField(max_length=100)
     icta_rep = models.CharField(max_length=100, blank=True)
+    signature = models.ImageField(upload_to='signatures/', blank=True, null=True)
 
     # Indoor AP1 (mandatory)
     indoor_ap1_serial = models.CharField(max_length=50)
@@ -37,6 +62,13 @@ class Institution(models.Model):
     onu_location = models.CharField(max_length=100)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='institutions_created'
+    )
 
     def __str__(self):
         return f"{self.name} ({self.dcc.name})"
@@ -63,3 +95,32 @@ class InstitutionPhoto(models.Model):
 
     def __str__(self):
         return f"{self.institution.name} - {self.photo_type}"
+
+class DeletionRequest(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+    institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name='deletion_requests')
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    reason = models.TextField(blank=True, null=True, help_text="Admin may give a reason for rejection/approval")
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                    on_delete=models.SET_NULL, related_name='approved_deletions')
+
+    def __str__(self):
+        return f"Deletion of {self.institution.name} by {self.requested_by.username} [{self.status}]"
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='sent_notifications')
+    institution = models.ForeignKey('Institution', on_delete=models.SET_NULL, null=True, blank=True)
+    message = models.CharField(max_length=255)
+    link = models.CharField(max_length=200, blank=True)   # optional URL
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} – {self.message[:50]}"
