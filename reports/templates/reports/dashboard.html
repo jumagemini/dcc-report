@@ -1,0 +1,49 @@
+{% extends "base.html" %}   {# or use a minimal template #}
+{% block content %}
+<div class="container mt-4">
+    {% if messages %}
+    <div class="container mt-2">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <h2>📟Device Installation 📡Field Report Generator</h2>
+    <p>Select a DCC to manage installations.</p>
+    {% if dccs %}
+        <div class="row">
+            {% for dcc in dccs %}
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ dcc.name }}</h5>
+                        <p class="card-text">
+                            {% if dcc.user_max %}
+                                Your installations: {{ dcc.user_count }} / {{ dcc.user_max }}
+                            {% else %}
+                                Total institutions: {{ dcc.institutions.count }}
+                            {% endif %}
+                        </p>
+                        
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'institution_create' dcc.id %}" class="btn btn-primary btn-sm">➕ Add Institution</a>
+                            <a href="{% url 'institution_list' dcc.id %}" class="btn btn-outline-secondary btn-sm">📋 View / Edit</a>
+                            <a href="{% url 'dcc_excel' dcc.id %}" class="btn btn-outline-success btn-sm">📊 Excel Report</a>
+                            <a href="{% url 'dcc_sheet1' dcc.id %}" class="btn btn-outline-success btn-sm">📋 Excel Sheet 1</a>
+                            <a href="{% url 'dcc_stickers' dcc.id %}" class="btn btn-outline-info btn-sm">🏷️ Device Labels</a>
+                            <a href="{% url 'dcc_photos' dcc.id %}" class="btn btn-outline-dark btn-sm">📦 Photos</a>
+                            <a href="{% url 'dcc_photos_word' dcc.id %}" class="btn btn-outline-primary btn-sm">📄 Photo Report (Word)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">You have no assigned DCCs. Contact the administrator on <strong>+254713714835</strong>.</div>
+    {% endif %}
+</div>
+{% endblock %}
