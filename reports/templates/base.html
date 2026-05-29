@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#0d6efd">
+
+    <title>{% block title %}Field Report Generator{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    {% block extra_head %}
+    <style>
+    .portrait-warning {
+        display: none;                     /* hidden by default */
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        color: white;
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    </style>
+    {% endblock %}
+</head>
+<body>
+    <!-- Portrait Warning Alert -->
+    <div class="modal fade" id="portraitModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">📱 Please Rotate Your Device</h5>
+            </div>
+            <div class="modal-body text-center">
+                <p>This form works best in <strong>landscape</strong> mode.</p>
+                <button id="dismissPortraitModal" class="btn btn-primary mt-2" data-bs-dismiss="modal">
+                I understand, let me continue
+                </button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">📋 Field Reports</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">📌 Dashboard</a>
+                    </li>
+                    {% if user_dccs %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dccDropdown" role="button" data-bs-toggle="dropdown">
+                            📍 My DCCs
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for dcc in user_dccs %}
+                            <li><a class="dropdown-item" href="{% url 'institution_list' dcc.id %}">{{ dcc.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endif %} 
+                </ul>
+                
+                <ul class="navbar-nav ms-auto d-flex flex-row align-items-center gap-2">
+                    {% if user.is_authenticated %}
+                     <!-- show wpa installation button -->
+                    <li class="nav-item">
+                        <button id="installBtn" class="btn btn-outline-light btn-sm d-none">
+                            📲 Install App
+                        </button>
+                    </li> 
+                     <!-- show pending offline installations -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="offlineDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            📶
+                            <span id="sync-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning" style="display:none;"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="offlineDropdown" style="min-width: 280px;">
+                            <div id="offline-pending-list" style="max-height: 200px; overflow-y: auto;">
+                                <li><span class="dropdown-item disabled">No pending submissions</span></li>
+                            </div>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button id="clear-offline-queue" class="dropdown-item text-danger">Clear queue</button></li>
+                        </ul>
+                    </li>   
+                    <!-- Notification Bell -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            🔔
+                            {% if unread_notifications > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ unread_notifications }}
+                                </span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="min-width: 300px;">
+                            <!-- Notifications will be loaded via AJAX to keep it simple, or we can preload a few -->
+                            <li><a class="dropdown-item" href="{% url 'notifications' %}">View all notifications</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="navbar-text me-3">👤 {{ user.username }}</span>
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item d-flex align-items-center">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Bootstrap JS (for dropdowns, navbar toggle) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript function that checks real device orientation -->
+    <script>
+        function handleOrientationChange() {
+            const modal = new bootstrap.Modal(document.getElementById('portraitModal'));
+            let isPortrait = false;
+
+            if (screen.orientation && screen.orientation.type) {
+                isPortrait = screen.orientation.type.includes('portrait');
+            } else {
+                isPortrait = window.innerWidth < window.innerHeight;
+            }
+
+            if (isPortrait && sessionStorage.getItem('portraitDismissed') !== 'true') {
+                modal.show();
+            } else {
+                modal.hide();
+            }
+        }
+
+        window.addEventListener('load', handleOrientationChange);
+        window.addEventListener('orientationchange', () => setTimeout(handleOrientationChange, 100));
+
+        // Dismiss button also sets a session flag so the pop‑up doesn’t keep re‑appearing
+        document.getElementById('dismissPortraitModal').addEventListener('click', () => {
+            sessionStorage.setItem('portraitDismissed', 'true');
+        });
+    </script>
+
+    <!-- dismiss button functional -->
+    <script>
+        // Dismiss button – hides the warning until page reload
+        document.getElementById('dismissWarning').addEventListener('click', function() {
+            document.getElementById('portraitWarning').style.display = 'none';
+            // Optional: store a flag to not show again this session
+            sessionStorage.setItem('portraitWarningDismissed', 'true');
+        });
+
+        // Respect the dismissal flag on load
+        if (sessionStorage.getItem('portraitWarningDismissed') === 'true') {
+            const warning = document.getElementById('portraitWarning');
+            if (warning) warning.style.display = 'none';
+        }
+    </script>
+
+    <!-- Service Worker Registration Script (placed at the bottom) -->
+   <script>
+        // 1. Register the service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% static 'serviceworker.js' %}")
+                    .then(reg => console.log('Service Worker registered:', reg.scope))
+                    .catch(err => console.error('Service Worker registration failed:', err));
+            });
+        }
+
+        // 2. Handle install prompt
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();                   // stop the default mini‑infobar
+            deferredPrompt = e;                   // save for later
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) installBtn.classList.remove('d-none');
+        });
+
+        // 3. Custom install button click
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`User response to install prompt: ${outcome}`);
+                    deferredPrompt = null;
+                    installBtn.classList.add('d-none');
+                }
+            });
+        }
+
+        // 4. Hide button after installation
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            const btn = document.getElementById('installBtn');
+            if (btn) btn.classList.add('d-none');
+        });
+    </script>
+
+    <!-- shows the number of pending offline submissions -->
+    <script>
+        async function updateSyncBadge() {
+            try {
+                const db = await window.openOfflineDB();
+                const tx = db.transaction('pending-metadata', 'readonly');
+                const store = tx.objectStore('pending-metadata');
+                const all = await new Promise((resolve, reject) => {
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+
+                const count = all.length;
+                const badge = document.getElementById('sync-badge');
+                const listContainer = document.getElementById('offline-pending-list');
+
+                // Update badge
+                if (badge) {
+                    badge.textContent = count > 0 ? count : '';
+                    badge.style.display = count > 0 ? 'inline' : 'none';
+                }
+
+                // Update dropdown list
+                if (listContainer) {
+                    if (count === 0) {
+                        listContainer.innerHTML = '<li><span class="dropdown-item disabled">No pending submissions</span></li>';
+                    } else {
+                        let html = '';
+                        all.forEach(item => {
+                            html += `<li><a class="dropdown-item" href="#">
+                                <strong>${item.institutionName}</strong><br>
+                                <small class="text-muted">${item.dccName}</small>
+                            </a></li>`;
+                        });
+                        listContainer.innerHTML = html;
+                    }
+                }
+            } catch (err) {
+                console.warn('[SyncBadge] Error:', err);
+            }
+        }
+        setInterval(updateSyncBadge, 3000);
+        updateSyncBadge();   // also run immediately
+
+        // Handle clearing the offline queue (optional)
+        document.getElementById('clear-offline-queue')?.addEventListener('click', async () => {
+            if (!confirm('Delete all pending offline submissions? This cannot be undone.')) return;
+            const db = await window.openOfflineDB();
+            const tx1 = db.transaction('pending-requests', 'readwrite');
+            await tx1.objectStore('pending-requests').clear();
+            const tx2 = db.transaction('pending-metadata', 'readwrite');
+            await tx2.objectStore('pending-metadata').clear();
+            updateSyncBadge();
+        });
+    </script>
+
+    <script>
+        // Request screen lock to landscape (works on Android Chrome, limited on iOS)
+        function lockToLandscape() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(err => {
+                    console.warn('Screen lock not supported:', err);
+                });
+            }
+        }
+
+        // Try to lock when the page loads and after any full‑screen change
+        window.addEventListener('load', lockToLandscape);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                lockToLandscape();
+            }
+        });
+
+        // Re‑lock after orientation change (in case user manually rotates away)
+        window.addEventListener('orientationchange', lockToLandscape);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+    
+</body>
+</html>
