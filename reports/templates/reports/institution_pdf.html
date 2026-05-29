@@ -246,7 +246,11 @@
         </tr>
         <tr>
             <td>Signature:</td>
-            <td></td>
+            <td>
+                {% if signature_base64 %}
+                    <img src="data:image/png;base64,{{ signature_base64 }}" style="height: 20px;">
+                {% endif %}
+            </td>
         </tr>
         <tr>
             <td>Date:</td>
