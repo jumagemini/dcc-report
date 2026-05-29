@@ -29,18 +29,20 @@ class MultipleFileField(forms.FileField):
             for f in value:
                 super().validate(f)
 
+        
 class InstitutionForm(forms.ModelForm):
     class Meta:
         model = Institution
-        exclude = ['dcc']  # exclude dcc, we'll set it manually
+        exclude = ['dcc', 'signature']      # ✅ exclude signature – we’ll save it manually
         widgets = {
             'date_of_installation': forms.DateInput(attrs={'type': 'date'}),
         }
-        def clean_icta_rep(self):
-            data = self.cleaned_data.get('icta_rep')
-            if data and data.strip().upper() == 'NA':
-                return ''
-            return data
+
+    def clean_icta_rep(self):                # ✅ moved out of Meta
+        data = self.cleaned_data.get('icta_rep')
+        if data and data.strip().upper() == 'NA':
+            return ''
+        return data        
 
 class PhotoUploadForm(forms.Form):
     
